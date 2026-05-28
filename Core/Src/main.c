@@ -23,7 +23,6 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -53,17 +52,64 @@ char string_buf[100];
 volatile uint32_t adc[6];
 uint32_t buffer[6];
 volatile uint8_t conversion_done_flag = 1;
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+int pwm(double speed, char inv);
+void motorControl(char motor, char dir, double speed);
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//speed in percent and inv is boolean for inverse or not
+int pwm(double speed, char inv){
+	if (!inv){
+		return 65535 * (speed/100);
+	}
+	else if (inv){
+		return 65535 * (1 - (speed/100));
+	}
+	return 0;
+}
 
+void motorControl(char motor, char dir, double speed){
+	if (motor == 'l'){
+		switch(dir){
+		//forward
+		case 'f':
+			HAL_GPIO_WritePin(GPIOA, phase2_L_Pin, GPIO_PIN_SET);
+			TIM1->CCR2 = pwm(speed, 1);
+			break;
+		//backward
+		case 'b':
+			HAL_GPIO_WritePin(GPIOA, phase2_L_Pin, GPIO_PIN_RESET);
+			TIM1->CCR2 = pwm(speed, 0);
+			break;
+		default:
+			break;
+		}
+	}
+	//right Motor
+	else if(motor == 'r'){
+		switch(dir){
+		case 'f':
+			HAL_GPIO_WritePin(GPIOB, phase2_R_Pin, GPIO_PIN_RESET);
+			TIM1->CCR3 = pwm(speed, 0);
+			break;
+		case 'b':
+			HAL_GPIO_WritePin(GPIOB, phase2_R_Pin, GPIO_PIN_SET);
+			TIM1->CCR3 = pwm(speed, 1);
+			break;
+		default:
+			break;
+		}
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -115,13 +161,14 @@ int main(void)
 		HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 		// Ausgabe der ADC -Werte hier
 		//adc[1]: encoder_left, adc[4]: encoder_right
-		uint8_t len = sprintf(string_buf, "%lu, %lu\r\n", adc[1], adc[4]);
+		uint8_t len = sprintf(string_buf, "%lu, %lu\n", adc[1], adc[4]);
 		// Daten über UART (USB) senden
 		HAL_UART_Transmit(&huart2, (uint8_t*) string_buf, len, HAL_MAX_DELAY);
 	}
-
-	TIM1 ->CCR2 = 0;
-	TIM1 ->CCR3 = 30000;
+	//forward
+	motorControl('r', 'f', 10);
+	motorControl('l', 'f', 10);
+	//HAL_Delay(10000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
