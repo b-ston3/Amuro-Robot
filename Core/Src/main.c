@@ -23,10 +23,11 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include "motor-control.h"
 
 /* USER CODE END Includes */
 
@@ -54,63 +55,26 @@ volatile uint32_t adc[6];
 uint32_t buffer[6];
 volatile uint8_t conversion_done_flag = 1;
 
-
+/*
+ * Speicher	Channel	PIN		Sensor
+ * adc[0]	IN5		PA0		lineSensor_middle
+ * adc[1]	IN6		PA1		encoder_left
+ * adc[2]	IN8		PA3		lineSensor_right
+ * adc[3]	IN9		PA4		battery (voltage)
+ * adc[4]	IN10 	PA5 	encoder_right
+ * adc[5]	IN12	PA7		lineSensor_left
+ */
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-int pwm(double speed, char inv);
-void motorControl(char motor, char dir, double speed);
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-//speed in percent and inv is boolean for inverse or not
-int pwm(double speed, char inv){
-	if (!inv){
-		return 65535 * (speed/100);
-	}
-	else if (inv){
-		return 65535 * (1 - (speed/100));
-	}
-	return 0;
-}
 
-void motorControl(char motor, char dir, double speed){
-	if (motor == 'l'){
-		switch(dir){
-		//forward
-		case 'f':
-			HAL_GPIO_WritePin(GPIOA, phase2_L_Pin, GPIO_PIN_SET);
-			TIM1->CCR2 = pwm(speed, 1);
-			break;
-		//backward
-		case 'b':
-			HAL_GPIO_WritePin(GPIOA, phase2_L_Pin, GPIO_PIN_RESET);
-			TIM1->CCR2 = pwm(speed, 0);
-			break;
-		default:
-			break;
-		}
-	}
-	//right Motor
-	else if(motor == 'r'){
-		switch(dir){
-		case 'f':
-			HAL_GPIO_WritePin(GPIOB, phase2_R_Pin, GPIO_PIN_RESET);
-			TIM1->CCR3 = pwm(speed, 0);
-			break;
-		case 'b':
-			HAL_GPIO_WritePin(GPIOB, phase2_R_Pin, GPIO_PIN_SET);
-			TIM1->CCR3 = pwm(speed, 1);
-			break;
-		default:
-			break;
-		}
-	}
-}
 /* USER CODE END 0 */
 
 /**
