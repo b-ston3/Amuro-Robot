@@ -1,0 +1,20 @@
+# Kompilierte Dateien und Build-Ordner
+Debug/
+Release/
+*.o
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+
+# IDE-spezifische Benutzer-Einstellungen
+.settings/
+.metadata/
+
+# CubeMX Cache
+.mxproject
+
+# OS-spezifischer Müll
+.DS_Store
+Thumbs.db
