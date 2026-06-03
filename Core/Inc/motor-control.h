@@ -11,7 +11,7 @@
 #include "tim.h"
 #include "gpio.h"
 
-static int pwm(double speed, char inv);
+//static int pwm(double speed, char inv);
 void motorControl(char motor, char dir, double speed);
 
 #endif /* INC_MOTOR_CONTROL_H_ */

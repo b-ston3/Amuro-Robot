@@ -28,7 +28,8 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "motor-control.h"
-
+#include "uart_debug.h"
+#include "encoder.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -126,9 +127,8 @@ int main(void)
 		HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 		// Ausgabe der ADC -Werte hier
 		//adc[1]: encoder_left, adc[4]: encoder_right
-		uint8_t len = sprintf(string_buf, "%lu, %lu\n", adc[1], adc[4]);
-		// Daten über UART (USB) senden
-		HAL_UART_Transmit(&huart2, (uint8_t*) string_buf, len, HAL_MAX_DELAY);
+		ser_printf("ADC-Werte: L=%lu, R=%lu; State (%u, %u)", adc[1], adc[4], schmitt_trigger('l', adc[1]), schmitt_trigger('r', adc[4]));
+
 	}
 	//forward
 	motorControl('r', 'f', 10);
