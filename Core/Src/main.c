@@ -32,6 +32,7 @@
 #include "encoder.h"
 #include "task_LED.h"
 #include "task_drive_forward.h"
+#include "task_parcours.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -117,7 +118,7 @@ int main(void) {
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
 	taskLED_Init();
-	taskDriveForward_Init(50);
+	taskParcours_Init(50);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -138,7 +139,7 @@ int main(void) {
 
 		}
 		taskLED();
-		taskDriveForward();
+		taskParcours();
 //		motorControl('l', 'f', 15);
 //		motorControl('r', 'f', 15);
 		/* USER CODE END WHILE */
