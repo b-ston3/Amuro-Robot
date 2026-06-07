@@ -23,6 +23,6 @@
  *   uart_printf("ADC Werte: L=%lu, R=%lu\n", adc[1], adc[4]);
  *   uart_printf("Calib: L=%u, R=%u (Samples: %u)\n", adc[1], adc[4], samples);
  */
-void ser_printf(const char* format, ...);
+void ser_printf(const char *format, ...);
 
 #endif /* INC_UART_DEBUG_C_ */
