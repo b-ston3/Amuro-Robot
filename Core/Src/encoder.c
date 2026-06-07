@@ -56,11 +56,3 @@ uint8_t schmitt_trigger(char motor, uint16_t inputSignal) {
 	}
 	return signal;
 }
-
-uint32_t get_l_enc_tickcounter() {
-	return l_enc_tickcounter;
-}
-
-uint32_t get_r_enc_tickcounter() {
-	return r_enc_tickcounter;
-}
