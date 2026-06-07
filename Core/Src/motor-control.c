@@ -7,14 +7,6 @@
 
 #include "motor-control.h"
 
-volatile double speed_left = 0;
-volatile double speed_right = 0;
-
-typedef enum {
-	FORWARD, BACKWARDS, TURN, STOP
-} DRIVE_STATE;
-static DRIVE_STATE drive_state = STOP;
-
 static int pwm(double speed, char inv) {
 	if (!inv) {
 		return 65535 * (speed / 100);
@@ -26,7 +18,6 @@ static int pwm(double speed, char inv) {
 
 void motorControl(char motor, char dir, double speed) {
 	if (motor == 'l') {
-		speed_left = speed;
 		switch (dir) {
 		//forward
 		case 'f':
@@ -44,7 +35,6 @@ void motorControl(char motor, char dir, double speed) {
 	}
 	//right Motor
 	else if (motor == 'r') {
-		speed_right = speed;
 		switch (dir) {
 		case 'f':
 			HAL_GPIO_WritePin(GPIOB, phase2_R_Pin, GPIO_PIN_RESET);
@@ -57,15 +47,5 @@ void motorControl(char motor, char dir, double speed) {
 		default:
 			break;
 		}
-	}
-}
-
-void drive_forward(double speed) {
-	if (drive_state != FORWARD) {
-		motorControl('l', 'f', speed);
-		motorControl('r', 'f', speed);
-	} else {
-		motorControl('l', 'f', (((get_l_enc_tickcounter() - get_r_enc_tickcounter())
-				/ get_l_enc_tickcounter()) * 100) + speed_left);
 	}
 }

@@ -31,6 +31,7 @@
 #include "uart_debug.h"
 #include "encoder.h"
 #include "task_LED.h"
+#include "task_drive_forward.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -115,32 +116,31 @@ int main(void) {
 	//HAL_ADC_Start_DMA(hadc1, buffer, 6);
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
-	taskLED();
+	taskLED_Init();
+	taskDriveForward_Init(50);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-		taskLED();
-
 		if (conversion_done_flag) {
 			conversion_done_flag = 0;
 
 			HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 			// Ausgabe der ADC -Werte hier
 			//adc[1]: encoder_left, adc[4]: encoder_right
+			uint8_t schmitt_l = schmitt_trigger('l', adc[1]);
+			uint8_t schmitt_r = schmitt_trigger('r', adc[4]);
 			ser_printf(
 					"ADC-Werte: L=%lu, R=%lu; State (%u, %u); Flanken links: %lu, Rechts: %lu\n",
-					adc[1], adc[4], schmitt_trigger('l', adc[1]),
-					schmitt_trigger('r', adc[4]), get_l_enc_tickcounter(),
-					get_r_enc_tickcounter());
+					adc[1], adc[4], schmitt_l, schmitt_r,
+					get_l_enc_tickcounter(), get_r_enc_tickcounter());
 
 		}
-		//forward
-//	motorControl('r', 'f', 15);
-//	motorControl('l', 'f', 15);
-		drive_forward(15);
-		//HAL_Delay(10000);
+		taskLED();
+		taskDriveForward();
+//		motorControl('l', 'f', 15);
+//		motorControl('r', 'f', 15);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

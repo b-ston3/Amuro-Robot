@@ -12,8 +12,6 @@
 #include "gpio.h"
 #include "encoder.h"
 
-//static int pwm(double speed, char inv);
 void motorControl(char motor, char dir, double speed);
-void drive_forward(double speed);
 
 #endif /* INC_MOTOR_CONTROL_H_ */
