@@ -10,10 +10,10 @@
 #include "encoder.h"
 
 static DRIVE_TASK_STATE drive_task_state = DRIVE_INIT;
-static float base_speed = 0;
+static float base_speed = 0.0f;
 static uint32_t last_regulation_time = 0;
-static float left_speed = 0;
-static float right_speed = 0;
+static float left_speed = 0.0f;
+static float right_speed = 0.0f;
 
 //Regelungs-Parameter
 #define REGULATION_INTERVAL 50u	// in ms wie oft regeln
@@ -37,8 +37,8 @@ static float clampf(float val, float lo, float hi) {
  * @param speed: Base speed 0-100%
  * @retval None
  */
-void taskDriveForward_Init(double speed) {
-	base_speed = (float) speed;
+void taskDriveForward_Init(float speed) {
+	base_speed = speed;
 	drive_task_state = DRIVE_INIT;
 	last_regulation_time = HAL_GetTick();
 }
@@ -49,8 +49,8 @@ void taskDriveForward(void) {
 
 	switch (drive_task_state) {
 	case DRIVE_INIT:
-		motorControl('l', 'f', (double) base_speed);
-		motorControl('r', 'f', (double) base_speed);
+		motorControl('l', 'f', base_speed);
+		motorControl('r', 'f', base_speed);
 
 		//reset both encoder tick counter
 		reset_l_enc_tickcounter();
@@ -80,14 +80,15 @@ void taskDriveForward(void) {
 			right_speed = clampf(right_speed, 0.0f, 100.0f);
 
 			// Apply regulated speeds to both motors
-			motorControl('r', 'f', (double) right_speed);
-			motorControl('l', 'f', (double) left_speed);
+			motorControl('r', 'f', right_speed);
+			motorControl('l', 'f', left_speed);
 		}
 		break;
 	case DRIVE_STOP:
 		// Stop motors
 		motorControl('l', 'f', 0);
 		motorControl('r', 'f', 0);
+		last_regulation_time = current_time;
 		break;
 	default:
 		break;
@@ -108,4 +109,12 @@ void taskDriveForward_Stop(void) {
  */
 DRIVE_TASK_STATE taskDriveForward_GetState(void) {
 	return drive_task_state;
+}
+
+float taskDriveForward_getLeftSpeed(void) {
+	return left_speed;
+}
+
+float taskDriveForward_getRightSpeed(void) {
+	return right_speed;
 }
