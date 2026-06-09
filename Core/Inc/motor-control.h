@@ -12,6 +12,6 @@
 #include "gpio.h"
 #include "encoder.h"
 
-void motorControl(char motor, char dir, double speed);
+void motorControl(char motor, char dir, float speed);
 
 #endif /* INC_MOTOR_CONTROL_H_ */
