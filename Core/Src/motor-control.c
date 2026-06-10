@@ -20,9 +20,9 @@ static float clampf(float val, float lo, float hi) {
 static int pwm(float speed, uint8_t inv) {
 	speed = clampf(speed, 0.0f, 100.0f);
 	if (!inv) {
-		return 65535 * (int) (speed / 100);
+		return (int) (65535 * (speed / 100));
 	} else if (inv) {
-		return 65535 * (int) (1 - (speed / 100));
+		return (int) (65535 * (1 - (speed / 100)));
 	}
 	return 0;
 }

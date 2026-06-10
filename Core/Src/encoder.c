@@ -7,10 +7,10 @@
 
 #include "encoder.h"
 
-#define ENCODER_LEFT_UPPER_THRESHOLD 3000
-#define ENCODER_LEFT_LOWER_THRESHOLD 580
+#define ENCODER_LEFT_UPPER_THRESHOLD 3100
+#define ENCODER_LEFT_LOWER_THRESHOLD 1500
 #define ENCODER_RIGHT_UPPER_THRESHOLD 3300
-#define ENCODER_RIGHT_LOWER_THRESHOLD 240
+#define ENCODER_RIGHT_LOWER_THRESHOLD 330
 
 volatile uint32_t l_enc_tickcounter = 0;
 volatile uint8_t l_enc_last_state = 0;

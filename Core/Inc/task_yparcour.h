@@ -8,6 +8,8 @@
 #ifndef INC_TASK_YPARCOUR_H_
 #define INC_TASK_YPARCOUR_H_
 
+#include "main.h"
+
 typedef enum {
 	YPARCOUR_INIT = 0,
 	YPARCOUR_SEGMENT_1_FORWARD_425,
