@@ -103,7 +103,7 @@ static void run_rotation_segment(float angle_deg, char left_dir, char right_dir,
 	}
 }
 
-void taskParcours_Init(float speed) {
+void taskYParcour_Init(float speed) {
 	base_speed = clampf(speed, 0.0f, 100.0f);
 	yparcour_task_state = YPARCOUR_INIT;
 	last_regulation_time = HAL_GetTick();

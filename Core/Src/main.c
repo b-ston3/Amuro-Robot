@@ -115,9 +115,9 @@ int main(void) {
 	MX_ADC1_Init();
 	MX_TIM1_Init();
 	/* USER CODE BEGIN 2 */
-	//HAL_ADC_Start_DMA(hadc1, buffer, 6);
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
+	HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 	taskLED_Init();
 	taskYParcour_Init(40.0f);
 //	taskDriveForward_Init(50);
@@ -132,13 +132,13 @@ int main(void) {
 			HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 			// Ausgabe der ADC -Werte hier
 			//adc[1]: encoder_left, adc[4]: encoder_right
-//			uint8_t schmitt_l = schmitt_trigger('l', adc[1]);
-//			uint8_t schmitt_r = schmitt_trigger('r', adc[4]);
-//			ser_printf(
-//					"ADC-Werte: L=%lu, R=%lu; State (%u, %u); Flanken links: %lu, Rechts: %lu\n",
-//					adc[1], adc[4], schmitt_l, schmitt_r,
-//					get_l_enc_tickcounter(), get_r_enc_tickcounter());
-			ser_printf("%lu, %lu\n", adc[1], adc[4]);
+			uint8_t schmitt_l = schmitt_trigger('l', adc[1]);
+			uint8_t schmitt_r = schmitt_trigger('r', adc[4]);
+			ser_printf(
+					"ADC-Werte: L=%lu, R=%lu; State (%u, %u); Flanken links: %lu, Rechts: %lu\n",
+					adc[1], adc[4], schmitt_l, schmitt_r,
+					get_l_enc_tickcounter(), get_r_enc_tickcounter());
+//			ser_printf("%lu, %lu\n", adc[1], adc[4]);
 
 		}
 		taskLED();
