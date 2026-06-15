@@ -12,8 +12,26 @@
 #include "task_drive_forward.h"
 #include "task_rotate.h"
 
-#define REGULATION_INTERVAL 50u
+// Segment 1: Geradeaus fahren
+#define SEG1_FORWARD_MM       425.0f
 
+// Segment 2: Erste Rotation
+#define SEG2_ROTATE_DEG       150.0f
+#define SEG2_LEFT_MOTOR_DIR   'f'       // 'f' = forward, 'b' = backward
+#define SEG2_RIGHT_MOTOR_DIR  'b'
+
+// Segment 3: Geradeaus fahren
+#define SEG3_FORWARD_MM       250.0f
+
+// Segment 4: Zweite Rotation
+#define SEG4_ROTATE_DEG       75.0f
+#define SEG4_LEFT_MOTOR_DIR   'b'
+#define SEG4_RIGHT_MOTOR_DIR  'f'
+
+// Segment 5: Geradeaus fahren
+#define SEG5_FORWARD_MM       200.0f
+
+#define REGULATION_INTERVAL 50u
 #define ENCODER_TICKS_PER_MM 2.00f
 
 static YPARCOUR_TASK_STATE yparcour_task_state = YPARCOUR_INIT;
@@ -127,28 +145,30 @@ void taskYParcour(void) {
 	case YPARCOUR_INIT:
 		reset_l_enc_tickcounter();
 		reset_r_enc_tickcounter();
-		yparcour_task_state = YPARCOUR_SEGMENT_1_FORWARD_425;
-		ser_printf("PARCOURS: start state=%d\n", yparcour_task_state);
+		yparcour_task_state = YPARCOUR_SEGMENT_1_FORWARD;
+		ser_printf("PARCOURS: start\n");
 		break;
 
-	case YPARCOUR_SEGMENT_1_FORWARD_425:
-		run_forward_segment(425.0f, YPARCOUR_SEGMENT_2_ROTATE_RIGHT_150);
+	case YPARCOUR_SEGMENT_1_FORWARD:
+		run_forward_segment(SEG1_FORWARD_MM, YPARCOUR_SEGMENT_2_ROTATE);
 		break;
 
-	case YPARCOUR_SEGMENT_2_ROTATE_RIGHT_150:
-		run_rotation_segment(150.0f, 'f', 'b', YPARCOUR_SEGMENT_3_FORWARD_250);
+	case YPARCOUR_SEGMENT_2_ROTATE:
+		run_rotation_segment(SEG2_ROTATE_DEG, SEG2_LEFT_MOTOR_DIR,
+				SEG2_RIGHT_MOTOR_DIR, YPARCOUR_SEGMENT_3_FORWARD);
 		break;
 
-	case YPARCOUR_SEGMENT_3_FORWARD_250:
-		run_forward_segment(250.0f, YPARCOUR_SEGMENT_4_ROTATE_LEFT_75);
+	case YPARCOUR_SEGMENT_3_FORWARD:
+		run_forward_segment(SEG3_FORWARD_MM, YPARCOUR_SEGMENT_4_ROTATE);
 		break;
 
-	case YPARCOUR_SEGMENT_4_ROTATE_LEFT_75:
-		run_rotation_segment(75.0f, 'b', 'f', YPARCOUR_SEGMENT_5_FORWARD_200);
+	case YPARCOUR_SEGMENT_4_ROTATE:
+		run_rotation_segment(SEG4_ROTATE_DEG, SEG4_LEFT_MOTOR_DIR,
+				SEG4_RIGHT_MOTOR_DIR, YPARCOUR_SEGMENT_5_FORWARD);
 		break;
 
-	case YPARCOUR_SEGMENT_5_FORWARD_200:
-		run_forward_segment(200.0f, YPARCOUR_FINISHED);
+	case YPARCOUR_SEGMENT_5_FORWARD:
+		run_forward_segment(SEG5_FORWARD_MM, YPARCOUR_FINISHED);
 		break;
 
 	case YPARCOUR_FINISHED:
