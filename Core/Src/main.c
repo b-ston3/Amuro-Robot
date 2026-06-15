@@ -117,7 +117,7 @@ int main(void) {
 	/* USER CODE BEGIN 2 */
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
-	HAL_ADC_Start_DMA(&hadc1, buffer, 6);
+//	HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 	taskLED_Init();
 	taskYParcour_Init(40.0f);
 //	taskDriveForward_Init(50);

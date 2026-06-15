@@ -44,6 +44,8 @@ static void run_forward_segment(float distance_mm,
 		reset_r_enc_tickcounter();
 
 		taskDriveForward_Init(base_speed);
+
+		taskDriveForward();
 		break;
 
 	case DRIVE_RUNNING:
@@ -55,25 +57,27 @@ static void run_forward_segment(float distance_mm,
 
 		if (progress_ticks >= target_ticks) {
 			taskDriveForward_Stop();
-			ser_printf(
-					"PARCOURS: state=%d done (forward %.0fmm), ticks L=%ld R=%ld target=%ld\n",
-					yparcour_task_state, distance_mm, left_ticks, right_ticks,
-					target_ticks);
+//			ser_printf(
+//					"PARCOURS: state=%d done (forward %.0fmm), ticks L=%ld R=%ld target=%ld\n",
+//					yparcour_task_state, distance_mm, left_ticks, right_ticks,
+//					target_ticks);
 			break;
 		}
 
 		taskDriveForward();
-		ser_printf(
-				"PARCOURS: state=%d fwd=%.0fmm progress=%ld/%ld ticks L=%ld R=%ld vL=%.1f vR=%.1f\n",
-				yparcour_task_state, distance_mm, progress_ticks, target_ticks,
-				left_ticks, right_ticks, taskDriveForward_getLeftSpeed(),
-				taskDriveForward_getRightSpeed());
+//		ser_printf(
+//				"PARCOURS: state=%d fwd=%.0fmm progress=%ld/%ld ticks L=%ld R=%ld vL=%.1f vR=%.1f\n",
+//				yparcour_task_state, distance_mm, progress_ticks, target_ticks,
+//				left_ticks, right_ticks, taskDriveForward_getLeftSpeed(),
+//				taskDriveForward_getRightSpeed());
 		break;
 
 	case DRIVE_STOP:
 		yparcour_task_state = next_state;
 		reset_l_enc_tickcounter();
 		reset_r_enc_tickcounter();
+
+		taskDriveForward_Init(base_speed);
 		break;
 
 	default:
@@ -86,6 +90,8 @@ static void run_rotation_segment(float angle_deg, char left_dir, char right_dir,
 	switch (taskRotate_GetState()) {
 	case ROTATION_INIT:
 		taskRotate_Init(angle_deg, left_dir, right_dir);
+
+		taskRotate();
 		break;
 
 	case ROTATION_RUNNING:
@@ -96,6 +102,8 @@ static void run_rotation_segment(float angle_deg, char left_dir, char right_dir,
 		yparcour_task_state = next_state;
 		reset_l_enc_tickcounter();
 		reset_r_enc_tickcounter();
+
+		taskRotate_Init(0.0f, 'f', 'f');
 		break;
 
 	default:
