@@ -34,6 +34,7 @@
 #include "task_drive_forward.h"
 #include "task_rotate.h"
 #include "task_yparcour.h"
+#include "task_linefollower.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -120,7 +121,8 @@ int main(void) {
 //	HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 	taskLED_Init();
 	taskYParcour_Init(40.0f);
-//	taskDriveForward_Init(50);
+	taskLineFollower_Init(30.0f);
+//	taskDriveForward_Init(40.0f);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -132,17 +134,20 @@ int main(void) {
 			HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 			// Ausgabe der ADC -Werte hier
 			//adc[1]: encoder_left, adc[4]: encoder_right
-			uint8_t schmitt_l = schmitt_trigger('l', adc[1]);
-			uint8_t schmitt_r = schmitt_trigger('r', adc[4]);
-			ser_printf(
-					"ADC-Werte: L=%lu, R=%lu; State (%u, %u); Flanken links: %lu, Rechts: %lu\n",
-					adc[1], adc[4], schmitt_l, schmitt_r,
-					get_l_enc_tickcounter(), get_r_enc_tickcounter());
+//			uint8_t schmitt_l = schmitt_trigger('l', adc[1]);
+//			uint8_t schmitt_r = schmitt_trigger('r', adc[4]);
+//			ser_printf(
+//					"ADC-Werte: L=%lu, R=%lu; State (%u, %u); Flanken links: %lu, Rechts: %lu\n",
+//					adc[1], adc[4], schmitt_l, schmitt_r,
+//					get_l_enc_tickcounter(), get_r_enc_tickcounter());
 //			ser_printf("%lu, %lu\n", adc[1], adc[4]);
+			//adc[5]: lineSensor_left, adc[0]: lineSensor_middle, adc[2]: lineSensor_right
+//			ser_printf("%lu, %lu, %lu\n", adc[5], adc[0], adc[2]);
 
 		}
-		taskLED();
-		taskYParcour();
+//		taskLED();
+//		taskYParcour();
+		taskLineFollower();
 //		taskDriveForward();
 //		motorControl('r', 'f', 15.0f);
 //		motorControl('l', 'f', 15.0f);
