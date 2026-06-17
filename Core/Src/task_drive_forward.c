@@ -17,7 +17,7 @@ static float right_speed = 0.0f;
 
 //Regelungs-Parameter
 #define REGULATION_INTERVAL 50u	// in ms wie oft regeln
-#define KP 0.5f					// Proportional-Verstärkung
+#define KP 0.00005f					// Proportional-Verstärkung
 #define MAX_CORRECTION 20.0f	// [%]  Max. Korrektur pro Seite
 
 // Motor-Kompensation (Hardware-Unterschiede ausgleichen)

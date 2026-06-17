@@ -120,9 +120,9 @@ int main(void) {
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
 //	HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 	taskLED_Init();
-	taskYParcour_Init(40.0f);
-	taskLineFollower_Init(30.0f);
-//	taskDriveForward_Init(40.0f);
+	taskYParcour_Init(45.0f);
+	taskLineFollower_Init(40.0f);
+//	taskDriveForward_Init(30.0f);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -134,8 +134,8 @@ int main(void) {
 			HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 			// Ausgabe der ADC -Werte hier
 			//adc[1]: encoder_left, adc[4]: encoder_right
-//			uint8_t schmitt_l = schmitt_trigger('l', adc[1]);
-//			uint8_t schmitt_r = schmitt_trigger('r', adc[4]);
+			uint8_t schmitt_l = schmitt_trigger('l', adc[1]);
+			uint8_t schmitt_r = schmitt_trigger('r', adc[4]);
 //			ser_printf(
 //					"ADC-Werte: L=%lu, R=%lu; State (%u, %u); Flanken links: %lu, Rechts: %lu\n",
 //					adc[1], adc[4], schmitt_l, schmitt_r,
@@ -145,9 +145,9 @@ int main(void) {
 //			ser_printf("%lu, %lu, %lu\n", adc[5], adc[0], adc[2]);
 
 		}
-//		taskLED();
-//		taskYParcour();
-		taskLineFollower();
+		taskLED();
+		taskYParcour();
+//		taskLineFollower();
 //		taskDriveForward();
 //		motorControl('r', 'f', 15.0f);
 //		motorControl('l', 'f', 15.0f);
