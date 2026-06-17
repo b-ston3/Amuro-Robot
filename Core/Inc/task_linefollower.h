@@ -14,6 +14,10 @@ typedef enum {
 	LINE_INIT, LINE_RUNNING, LINE_LOST, LINE_STOP
 } LINEFOLLOWER_TASK_STATE;
 
+typedef enum {
+	LINE_LEFT, LINE_MIDDLE, LINE_RIGHT
+} LINE_LAST_SEEN;
+
 void taskLineFollower_Init(float speed);
 void taskLineFollower(void);
 void taskLineFollower_Stop(void);

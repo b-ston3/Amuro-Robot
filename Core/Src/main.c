@@ -134,8 +134,11 @@ int main(void) {
 			HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 			// Ausgabe der ADC -Werte hier
 			//adc[1]: encoder_left, adc[4]: encoder_right
-			uint8_t schmitt_l = schmitt_trigger('l', adc[1]);
-			uint8_t schmitt_r = schmitt_trigger('r', adc[4]);
+			schmitt_trigger('l', adc[1]);
+			schmitt_trigger('r', adc[4]);
+
+//			uint8_t schmitt_l = schmitt_trigger('l', adc[1]);
+//			uint8_t schmitt_r = schmitt_trigger('r', adc[4]);
 //			ser_printf(
 //					"ADC-Werte: L=%lu, R=%lu; State (%u, %u); Flanken links: %lu, Rechts: %lu\n",
 //					adc[1], adc[4], schmitt_l, schmitt_r,
@@ -146,8 +149,8 @@ int main(void) {
 
 		}
 		taskLED();
-		taskYParcour();
-//		taskLineFollower();
+//		taskYParcour();
+		taskLineFollower();
 //		taskDriveForward();
 //		motorControl('r', 'f', 15.0f);
 //		motorControl('l', 'f', 15.0f);

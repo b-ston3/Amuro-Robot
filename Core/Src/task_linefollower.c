@@ -15,6 +15,8 @@ static uint32_t last_regulation_time = 0;
 static float left_speed = 0.0f;
 static float right_speed = 0.0f;
 
+static LINE_LAST_SEEN line_last_seen = LINE_MIDDLE;
+
 // Zugriff auf das globale ADC-Array aus der main.c
 // adc[5]: lineSensor_left, adc[0]: lineSensor_middle, adc[2]: lineSensor_right
 extern volatile uint32_t adc[6];
@@ -67,13 +69,24 @@ void taskLineFollower(void) {
 			uint32_t raw_middle = adc[0];
 			uint32_t raw_right = adc[2];
 
-			if (raw_left < BLACK_THRESHOLD && raw_middle < BLACK_THRESHOLD && raw_right < BLACK_THRESHOLD) {
+			if (raw_left < BLACK_THRESHOLD && raw_middle < BLACK_THRESHOLD
+					&& raw_right < BLACK_THRESHOLD) {
 				linefollower_task_state = LINE_LOST;
 				break;
 			}
 
-			int32_t left_val = (int32_t)raw_left + RIGHT_SENSOR_OFFSET;
-			int32_t right_val = (int32_t)raw_right;
+			if (raw_left >= BLACK_THRESHOLD
+					&& raw_left + RIGHT_SENSOR_OFFSET >= raw_right) {
+				line_last_seen = LINE_LEFT;
+			} else if (raw_right >= BLACK_THRESHOLD
+					&& raw_right >= raw_left + RIGHT_SENSOR_OFFSET) {
+				line_last_seen = LINE_RIGHT;
+			} else if (raw_middle >= BLACK_THRESHOLD) {
+				line_last_seen = LINE_MIDDLE;
+			}
+
+			int32_t left_val = (int32_t) raw_left + RIGHT_SENSOR_OFFSET;
+			int32_t right_val = (int32_t) raw_right;
 
 			int32_t sensor_diff = left_val - right_val;
 			float correction = KP * (float) sensor_diff;
@@ -91,10 +104,16 @@ void taskLineFollower(void) {
 		break;
 
 	case LINE_LOST:
-		//TODO: Line Lost cases
-		motorControl('l', 'f', 0);
-		motorControl('r', 'f', 0);
-		last_regulation_time = current_time;
+		if (time_since_regulation >= REGULATION_INTERVAL) {
+			switch (line_last_seen) {
+			case LINE_LEFT:
+				//TODO: basically implement the line search completely
+				break;
+			}
+			motorControl('l', 'f', 0);
+			motorControl('r', 'f', 0);
+			last_regulation_time = current_time;
+		}
 		break;
 
 	case LINE_STOP:
