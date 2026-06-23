@@ -46,7 +46,8 @@ typedef enum {
 	ROBOT_DRIVE_YELLOW_PARCOUR,
 	ROBOT_FOLLOW_LINE,
 	ROBOT_SEARCH_LINE,
-	ROBOT_OVERCOME_GAP
+	ROBOT_OVERCOME_GAP,
+	ROBOT_AVOID_OBSTACLE
 } ROBOT_MAIN_STATE;
 /* USER CODE END PTD */
 
@@ -89,7 +90,14 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+static uint8_t is_obstacle_detected(void) {
+	return (HAL_GPIO_ReadPin(switch_left_GPIO_Port, switch_left_Pin)
+			== GPIO_PIN_RESET
+			|| HAL_GPIO_ReadPin(switch_middle_GPIO_Port, switch_middle_Pin)
+					== GPIO_PIN_RESET
+			|| HAL_GPIO_ReadPin(switch_right_GPIO_Port, switch_right_Pin)
+					== GPIO_PIN_RESET);
+}
 /* USER CODE END 0 */
 
 /**
@@ -156,11 +164,18 @@ int main(void) {
 			//adc[5]: lineSensor_left, adc[0]: lineSensor_middle, adc[2]: lineSensor_right
 //			ser_printf("%lu, %lu, %lu\n", adc[5], adc[0], adc[2]);
 
-		//}
+		}
 
 		switch (current_robot_state) {
 		case ROBOT_FOLLOW_LINE:
 			taskLineFollower();
+
+			if (is_obstacle_detected()) {
+				taskLineFollower_Stop();
+				taskAvoidObstacle_Init();
+				current_robot_state = ROBOT_AVOID_OBSTACLE;
+				break;
+			}
 
 			// Transition: Wenn der Follower die Linie verliert
 			if (taskLineFollower_GetState() == LINE_LOST) {
@@ -176,7 +191,7 @@ int main(void) {
 			// Transition 1: Linie erfolgreich wiedergefunden!
 			if (taskSearchLine_GetState() == SEARCH_SUCCESS) {
 				// Follower neu starten (damit er aus dem LINE_LOST State rauskommt)
-				taskLineFollower_Init(40.0f);
+				taskLineFollower_Init(36.0f);
 				current_robot_state = ROBOT_FOLLOW_LINE;
 			}
 			// Transition 2: Suche erfolglos, es muss eine Lücke sein!
@@ -193,22 +208,30 @@ int main(void) {
 			// Transition: Lücke überwunden, Linie ist wieder da!
 			if (taskOvercomeGap_GetState() == GAP_SUCCESS) {
 				taskOvercomeGap_Init(36.0f);
+				taskLineFollower_Init(36.0f);
+				current_robot_state = ROBOT_FOLLOW_LINE;
+			}
+			break;
+		case ROBOT_AVOID_OBSTACLE:
+			taskAvoidObstacle();
+
+			if (taskAvoidObstacle_GetState() == AVOID_SUCCESS) {
 				taskLineFollower_Init(40.0f);
 				current_robot_state = ROBOT_FOLLOW_LINE;
 			}
 			break;
 		}
-		}
-		taskLED();
+	}
+	taskLED();
 //		taskYParcour();
 //		taskLineFollower();
 //		taskDriveForward();
 //		motorControl('r', 'f', 15.0f);
 //		motorControl('l', 'f', 15.0f);
-		/* USER CODE END WHILE */
+	/* USER CODE END WHILE */
 
-		/* USER CODE BEGIN 3 */
-	}
+	/* USER CODE BEGIN 3 */
+	//}
 	/* USER CODE END 3 */
 }
 

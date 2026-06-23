@@ -11,8 +11,7 @@
 #include "encoder.h"
 #include "uart_debug.h"
 
-// 100 Grad Drehung auf einem Rad (muss evtl. kalibriert werden)
-#define SWEEP_100_DEG_TICKS 31	//13.451375f
+#define SWEEP_100_DEG_TICKS 31
 #define BLACK_THRESHOLD 2800
 #define REGULATION_INTERVAL 20u
 
@@ -85,6 +84,14 @@ void taskSearchLine(void) {
 
 	case SEARCH_SWEEP_PRIMARY_IN:
 		if (time_since_regulation >= REGULATION_INTERVAL) {
+			if (is_line_found()) {
+				motorControl('l', 'f', 0);
+				motorControl('r', 'f', 0);
+				search_state = SEARCH_SUCCESS;
+				last_regulation_time = current_time;
+				break;
+			}
+
 			// Drehe zurück in die Ausgangsposition
 			if (primary_direction == LINE_LEFT) {
 				motorControl('l', 'f', 0);
@@ -140,19 +147,27 @@ void taskSearchLine(void) {
 
 	case SEARCH_SWEEP_SECONDARY_IN:
 		if (time_since_regulation >= REGULATION_INTERVAL) {
+			if (is_line_found()) {
+				motorControl('l', 'f', 0);
+				motorControl('r', 'f', 0);
+				search_state = SEARCH_SUCCESS;
+				last_regulation_time = current_time;
+				break;
+			}
+
 			// Zurück zur Mitte
 			if (primary_direction == LINE_LEFT) {
 				motorControl('l', 'b', base_speed);
 				motorControl('r', 'f', 0);
 				if (get_l_enc_tickcounter() > SWEEP_100_DEG_TICKS) {
-					motorControl('r', 'f', 0);
-					search_state = SEARCH_FAILED_GAP; // Linie nicht gefunden -> Lücke!
+					motorControl('l', 'f', 0);
+					search_state = SEARCH_FAILED_GAP;
 				}
 			} else {
 				motorControl('l', 'f', 0);
 				motorControl('r', 'b', base_speed);
 				if (get_r_enc_tickcounter() > SWEEP_100_DEG_TICKS) {
-					motorControl('l', 'f', 0);
+					motorControl('r', 'f', 0);
 					search_state = SEARCH_FAILED_GAP;
 				}
 			}

@@ -11,7 +11,7 @@
 #include "motor-control.h"
 #include "encoder.h"
 
-#define GAP_STEP_MM             40.0f   // Abstand zwischen den Drehetappen
+#define GAP_STEP_MM             100.0f   // Abstand zwischen den Drehetappen
 #define GAP_SWEEP_DEG           10.0f   // Drehwinkel in Drehetappe
 #define MAX_GAP_MM              200.0f  // Sicherheitsabschaltung
 
@@ -99,6 +99,8 @@ void taskOvercomeGap(void) {
 
 			// 2.: Kurz nach links "schauen"
 		case GAP_CHECK_LEFT_INIT:
+			reset_l_enc_tickcounter();
+			reset_r_enc_tickcounter();
 			taskRotate_Init(GAP_SWEEP_DEG, 'b', 'f'); // Auf der Stelle nach links
 			taskRotate();
 			gap_state = GAP_CHECK_LEFT;
@@ -113,6 +115,8 @@ void taskOvercomeGap(void) {
 
 			// 3.: Nach rechts "schauen" (Doppelter Winkel, da wir aktuell links stehen)
 		case GAP_CHECK_RIGHT_INIT:
+			reset_l_enc_tickcounter();
+			reset_r_enc_tickcounter();
 			taskRotate_Init(GAP_SWEEP_DEG * 2.0f, 'f', 'b'); // Auf der Stelle nach rechts
 			taskRotate();
 			gap_state = GAP_CHECK_RIGHT;
@@ -127,6 +131,8 @@ void taskOvercomeGap(void) {
 
 			// 4.: Wieder mittig ausrichten
 		case GAP_RETURN_CENTER_INIT:
+			reset_l_enc_tickcounter();
+			reset_r_enc_tickcounter();
 			taskRotate_Init(GAP_SWEEP_DEG, 'b', 'f'); // Zurück zur Mitte
 			taskRotate();
 			gap_state = GAP_RETURN_CENTER;
