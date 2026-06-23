@@ -49,6 +49,8 @@ static float clampf(float val, float lo, float hi) {
 }
 
 static void stop_motors(void) {
+	taskDriveForward_Stop();
+	taskRotate_Stop();
 	motorControl('l', 'f', 0);
 	motorControl('r', 'f', 0);
 }

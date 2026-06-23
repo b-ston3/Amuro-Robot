@@ -35,11 +35,19 @@
 #include "task_rotate.h"
 #include "task_yparcour.h"
 #include "task_linefollower.h"
+#include "task_searchLine.h"
+#include "task_overcomeGap.h"
+#include "task_avoidObstacle.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef enum {
+	ROBOT_DRIVE_YELLOW_PARCOUR,
+	ROBOT_FOLLOW_LINE,
+	ROBOT_SEARCH_LINE,
+	ROBOT_OVERCOME_GAP
+} ROBOT_MAIN_STATE;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -61,6 +69,7 @@ volatile uint32_t adc[6];
 uint32_t buffer[6];
 volatile uint8_t conversion_done_flag = 1;
 
+ROBOT_MAIN_STATE current_robot_state = ROBOT_FOLLOW_LINE;
 /*
  * Speicher	Channel	PIN		Sensor
  * adc[0]	IN5		PA0		lineSensor_middle
@@ -147,10 +156,52 @@ int main(void) {
 			//adc[5]: lineSensor_left, adc[0]: lineSensor_middle, adc[2]: lineSensor_right
 //			ser_printf("%lu, %lu, %lu\n", adc[5], adc[0], adc[2]);
 
+		//}
+
+		switch (current_robot_state) {
+		case ROBOT_FOLLOW_LINE:
+			taskLineFollower();
+
+			// Transition: Wenn der Follower die Linie verliert
+			if (taskLineFollower_GetState() == LINE_LOST) {
+				// Wechsle in den Such-Modus und initialisiere ihn
+				taskSearchLine_Init(36.0f);
+				current_robot_state = ROBOT_SEARCH_LINE;
+			}
+			break;
+
+		case ROBOT_SEARCH_LINE:
+			taskSearchLine();
+
+			// Transition 1: Linie erfolgreich wiedergefunden!
+			if (taskSearchLine_GetState() == SEARCH_SUCCESS) {
+				// Follower neu starten (damit er aus dem LINE_LOST State rauskommt)
+				taskLineFollower_Init(40.0f);
+				current_robot_state = ROBOT_FOLLOW_LINE;
+			}
+			// Transition 2: Suche erfolglos, es muss eine Lücke sein!
+			else if (taskSearchLine_GetState() == SEARCH_FAILED_GAP) {
+				taskSearchLine_Init(36.0f);
+				taskOvercomeGap_Init(36.0f);
+				current_robot_state = ROBOT_OVERCOME_GAP;
+			}
+			break;
+
+		case ROBOT_OVERCOME_GAP:
+			taskOvercomeGap();
+
+			// Transition: Lücke überwunden, Linie ist wieder da!
+			if (taskOvercomeGap_GetState() == GAP_SUCCESS) {
+				taskOvercomeGap_Init(36.0f);
+				taskLineFollower_Init(40.0f);
+				current_robot_state = ROBOT_FOLLOW_LINE;
+			}
+			break;
+		}
 		}
 		taskLED();
 //		taskYParcour();
-		taskLineFollower();
+//		taskLineFollower();
 //		taskDriveForward();
 //		motorControl('r', 'f', 15.0f);
 //		motorControl('l', 'f', 15.0f);

@@ -104,16 +104,9 @@ void taskLineFollower(void) {
 		break;
 
 	case LINE_LOST:
-		if (time_since_regulation >= REGULATION_INTERVAL) {
-			switch (line_last_seen) {
-			case LINE_LEFT:
-				//TODO: basically implement the line search completely
-				break;
-			}
-			motorControl('l', 'f', 0);
-			motorControl('r', 'f', 0);
-			last_regulation_time = current_time;
-		}
+		motorControl('l', 'f', 0);
+		motorControl('r', 'f', 0);
+		last_regulation_time = current_time;
 		break;
 
 	case LINE_STOP:
@@ -149,4 +142,8 @@ float taskLineFollower_getLeftSpeed(void) {
 
 float taskLineFollower_getRightSpeed(void) {
 	return right_speed;
+}
+
+LINE_LAST_SEEN taskLineFollower_GetLastSeen(void) {
+	return line_last_seen;
 }

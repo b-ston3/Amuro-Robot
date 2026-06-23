@@ -25,5 +25,5 @@ LINEFOLLOWER_TASK_STATE taskLineFollower_GetState(void);
 //void taskLineFollower_setSensors(uint32_t raw_left, uint32_t raw_middle, uint32_t raw_right);
 float taskLineFollower_getLeftSpeed(void);
 float taskLineFollower_getRightSpeed(void);
-
+LINE_LAST_SEEN taskLineFollower_GetLastSeen(void);
 #endif /* INC_TASK_LINEFOLLOWER_H_ */
