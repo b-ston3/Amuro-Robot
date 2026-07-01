@@ -26,9 +26,9 @@ extern volatile uint32_t adc[6];
 #define KP 0.027f                   // Proportional-Verstärkung
 #define MAX_CORRECTION 30.0f
 
-#define RIGHT_SENSOR_OFFSET 210     // Hardware-Unterschied der Sensoren
+#define RIGHT_SENSOR_OFFSET 100		//210     // Hardware-Unterschied der Sensoren
 
-#define BLACK_THRESHOLD 2800        // ADC-Werte unter diesem Wert gelten als "Weiß"
+#define BLACK_THRESHOLD 3100        // ADC-Werte unter diesem Wert gelten als "Weiß"
 
 static float clampf(float val, float lo, float hi) {
 	if (val < lo)

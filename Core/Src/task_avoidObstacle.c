@@ -18,26 +18,27 @@
 #define AVOID_ANGLE_1_DEG       45.0f
 
 // Schritt 2: Erstes Stück geradeaus
-#define AVOID_DRIVE_1_MM        80.0f
+#define AVOID_DRIVE_1_MM        105.0f
 
 // Schritt 3: Erste Linksdrehung
 #define AVOID_ANGLE_2_DEG       45.0f
 
 // Schritt 4: Langes Stück am Hindernis vorbei
-#define AVOID_DRIVE_2_MM        180.0f
+#define AVOID_DRIVE_2_MM        105.0f
 
 // Schritt 5: Zweite Linksdrehung
-#define AVOID_ANGLE_3_DEG       45.0f
+#define AVOID_ANGLE_3_DEG       67.5f
 
 // Schritt 6: Zurück in Richtung Linie
-#define AVOID_DRIVE_3_MM        80.0f
+#define AVOID_DRIVE_3_MM        100.0f
+#define AVOID_DRIVE_3_SEARCH_IN_MM 50.0f
 
 // Schritt 7: Finale Rechtsdrehung zur Linie
 #define AVOID_RETURN_MAX_DEG    120.0f  // Maximalwinkel als Fallback für die letzte Drehung
 
 // Hardware-Konstanten
 #define ENCODER_TICKS_PER_MM    0.20f
-#define BLACK_THRESHOLD         2800
+#define BLACK_THRESHOLD         3100
 
 static AVOID_OBSTACLE_STATE avoid_state = AVOID_INIT;
 extern volatile uint32_t adc[6];
@@ -127,6 +128,16 @@ void taskAvoidObstacle(void) {
 
 	case AVOID_DRIVE_3:
 		taskDriveForward();
+		if ((get_l_enc_tickcounter()
+				> AVOID_DRIVE_3_SEARCH_IN_MM * ENCODER_TICKS_PER_MM)
+				&& (adc[5] > BLACK_THRESHOLD || adc[0] > BLACK_THRESHOLD
+						|| adc[2] > BLACK_THRESHOLD)) {
+			taskRotate_Stop();
+			motorControl('l', 'f', 0);
+			motorControl('r', 'f', 0);
+			avoid_state = AVOID_SUCCESS;
+			break;
+		}
 		if (get_l_enc_tickcounter()
 				> (AVOID_DRIVE_3_MM * ENCODER_TICKS_PER_MM)) {
 			taskDriveForward_Stop();

@@ -12,7 +12,7 @@
 #include "uart_debug.h"
 
 #define SWEEP_100_DEG_TICKS 31
-#define BLACK_THRESHOLD 2800
+#define BLACK_THRESHOLD 3100	//2800
 #define REGULATION_INTERVAL 20u
 
 static uint32_t last_regulation_time = 0;

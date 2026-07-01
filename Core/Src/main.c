@@ -221,18 +221,19 @@ int main(void) {
 			}
 			break;
 		}
-	}
-	taskLED();
+
+		taskLED();
 //		taskYParcour();
 //		taskLineFollower();
 //		taskDriveForward();
 //		motorControl('r', 'f', 15.0f);
 //		motorControl('l', 'f', 15.0f);
-	/* USER CODE END WHILE */
+		/* USER CODE END WHILE */
 
-	/* USER CODE BEGIN 3 */
-	//}
-	/* USER CODE END 3 */
+		/* USER CODE BEGIN 3 */
+		//}
+		/* USER CODE END 3 */
+	}
 }
 
 /**
