@@ -164,64 +164,69 @@ int main(void) {
 			//adc[5]: lineSensor_left, adc[0]: lineSensor_middle, adc[2]: lineSensor_right
 //			ser_printf("%lu, %lu, %lu\n", adc[5], adc[0], adc[2]);
 
-		}
+//		}
 
-		switch (current_robot_state) {
-		case ROBOT_FOLLOW_LINE:
-			taskLineFollower();
+			switch (current_robot_state) {
+			case ROBOT_FOLLOW_LINE:
+				taskLineFollower();
 
-			if (is_obstacle_detected()) {
-				taskLineFollower_Stop();
-				taskAvoidObstacle_Init();
-				current_robot_state = ROBOT_AVOID_OBSTACLE;
+				if (is_obstacle_detected()) {
+					taskLineFollower_Stop();
+					taskAvoidObstacle_Init();
+					current_robot_state = ROBOT_AVOID_OBSTACLE;
+					break;
+				}
+
+				// Transition: Wenn der Follower die Linie verliert
+				if (taskLineFollower_GetState() == LINE_LOST) {
+					// Wechsle in den Such-Modus und initialisiere ihn
+					taskSearchLine_Init(36.0f);
+					current_robot_state = ROBOT_SEARCH_LINE;
+				}
+				break;
+
+			case ROBOT_SEARCH_LINE:
+				taskSearchLine();
+
+				if (is_obstacle_detected()) {
+					taskAvoidObstacle_Init();
+					current_robot_state = ROBOT_AVOID_OBSTACLE;
+					break;
+				}
+				// Transition 1: Linie erfolgreich wiedergefunden!
+				if (taskSearchLine_GetState() == SEARCH_SUCCESS) {
+					// Follower neu starten (damit er aus dem LINE_LOST State rauskommt)
+					taskLineFollower_Init(36.0f);
+					current_robot_state = ROBOT_FOLLOW_LINE;
+				}
+				// Transition 2: Suche erfolglos, es muss eine Lücke sein!
+				else if (taskSearchLine_GetState() == SEARCH_FAILED_GAP) {
+					taskSearchLine_Init(36.0f);
+					taskOvercomeGap_Init(36.0f);
+					current_robot_state = ROBOT_OVERCOME_GAP;
+				}
+				break;
+
+			case ROBOT_OVERCOME_GAP:
+				taskOvercomeGap();
+
+				// Transition: Lücke überwunden, Linie ist wieder da!
+				if (taskOvercomeGap_GetState() == GAP_SUCCESS) {
+					taskOvercomeGap_Init(36.0f);
+					taskLineFollower_Init(36.0f);
+					current_robot_state = ROBOT_FOLLOW_LINE;
+				}
+				break;
+			case ROBOT_AVOID_OBSTACLE:
+				taskAvoidObstacle();
+
+				if (taskAvoidObstacle_GetState() == AVOID_SUCCESS) {
+					taskLineFollower_Init(40.0f);
+					current_robot_state = ROBOT_FOLLOW_LINE;
+				}
 				break;
 			}
-
-			// Transition: Wenn der Follower die Linie verliert
-			if (taskLineFollower_GetState() == LINE_LOST) {
-				// Wechsle in den Such-Modus und initialisiere ihn
-				taskSearchLine_Init(36.0f);
-				current_robot_state = ROBOT_SEARCH_LINE;
-			}
-			break;
-
-		case ROBOT_SEARCH_LINE:
-			taskSearchLine();
-
-			// Transition 1: Linie erfolgreich wiedergefunden!
-			if (taskSearchLine_GetState() == SEARCH_SUCCESS) {
-				// Follower neu starten (damit er aus dem LINE_LOST State rauskommt)
-				taskLineFollower_Init(36.0f);
-				current_robot_state = ROBOT_FOLLOW_LINE;
-			}
-			// Transition 2: Suche erfolglos, es muss eine Lücke sein!
-			else if (taskSearchLine_GetState() == SEARCH_FAILED_GAP) {
-				taskSearchLine_Init(36.0f);
-				taskOvercomeGap_Init(36.0f);
-				current_robot_state = ROBOT_OVERCOME_GAP;
-			}
-			break;
-
-		case ROBOT_OVERCOME_GAP:
-			taskOvercomeGap();
-
-			// Transition: Lücke überwunden, Linie ist wieder da!
-			if (taskOvercomeGap_GetState() == GAP_SUCCESS) {
-				taskOvercomeGap_Init(36.0f);
-				taskLineFollower_Init(36.0f);
-				current_robot_state = ROBOT_FOLLOW_LINE;
-			}
-			break;
-		case ROBOT_AVOID_OBSTACLE:
-			taskAvoidObstacle();
-
-			if (taskAvoidObstacle_GetState() == AVOID_SUCCESS) {
-				taskLineFollower_Init(40.0f);
-				current_robot_state = ROBOT_FOLLOW_LINE;
-			}
-			break;
 		}
-
 		taskLED();
 //		taskYParcour();
 //		taskLineFollower();

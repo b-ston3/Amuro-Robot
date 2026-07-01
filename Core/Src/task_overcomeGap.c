@@ -11,12 +11,12 @@
 #include "motor-control.h"
 #include "encoder.h"
 
-#define GAP_STEP_MM             100.0f   // Abstand zwischen den Drehetappen
+#define GAP_STEP_MM             50.0f   // Abstand zwischen den Drehetappen
 #define GAP_SWEEP_DEG           10.0f   // Drehwinkel in Drehetappe
-#define MAX_GAP_MM              200.0f  // Sicherheitsabschaltung
+#define MAX_GAP_MM              300.0f  // Sicherheitsabschaltung
 
 #define ENCODER_TICKS_PER_MM    0.20f
-#define BLACK_THRESHOLD         2800    // Schwellenwert für die Linienerkennung
+#define BLACK_THRESHOLD         3100    // Schwellenwert für die Linienerkennung
 
 #define REGULATION_INTERVAL     20u
 
