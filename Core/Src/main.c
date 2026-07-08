@@ -70,7 +70,7 @@ volatile uint32_t adc[6];
 uint32_t buffer[6];
 volatile uint8_t conversion_done_flag = 1;
 
-ROBOT_MAIN_STATE current_robot_state = ROBOT_FOLLOW_LINE;
+ROBOT_MAIN_STATE current_robot_state = ROBOT_DRIVE_YELLOW_PARCOUR;
 /*
  * Speicher	Channel	PIN		Sensor
  * adc[0]	IN5		PA0		lineSensor_middle
@@ -138,7 +138,7 @@ int main(void) {
 //	HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 	taskLED_Init();
 	taskYParcour_Init(45.0f);
-	taskLineFollower_Init(40.0f);
+	//taskLineFollower_Init(40.0f);
 //	taskDriveForward_Init(30.0f);
 	/* USER CODE END 2 */
 
@@ -167,6 +167,17 @@ int main(void) {
 //		}
 
 			switch (current_robot_state) {
+			case ROBOT_DRIVE_YELLOW_PARCOUR:
+				taskYParcour();
+
+				if(taskYParcour_GetState() == YPARCOUR_FINISHED) {
+					taskYParcour_Stop();
+					taskLineFollower_Init(36.0f);
+					current_robot_state = ROBOT_FOLLOW_LINE;
+					break;
+				}
+				break;
+
 			case ROBOT_FOLLOW_LINE:
 				taskLineFollower();
 

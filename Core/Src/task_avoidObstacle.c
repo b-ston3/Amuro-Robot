@@ -24,14 +24,14 @@
 #define AVOID_ANGLE_2_DEG       45.0f
 
 // Schritt 4: Langes Stück am Hindernis vorbei
-#define AVOID_DRIVE_2_MM        105.0f
+#define AVOID_DRIVE_2_MM        110.0f	//105.0f
 
 // Schritt 5: Zweite Linksdrehung
 #define AVOID_ANGLE_3_DEG       67.5f
 
 // Schritt 6: Zurück in Richtung Linie
 #define AVOID_DRIVE_3_MM        100.0f
-#define AVOID_DRIVE_3_SEARCH_IN_MM 50.0f
+#define AVOID_DRIVE_3_SEARCH_IN_MM 80.0f
 
 // Schritt 7: Finale Rechtsdrehung zur Linie
 #define AVOID_RETURN_MAX_DEG    120.0f  // Maximalwinkel als Fallback für die letzte Drehung
