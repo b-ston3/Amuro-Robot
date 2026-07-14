@@ -13,26 +13,26 @@
 #include "task_rotate.h"
 
 // Segment 1: Geradeaus fahren
-#define SEG1_FORWARD_MM       425.0f
+#define SEG1_FORWARD_MM       590.0f
 
 // Segment 2: Erste Rotation
-#define SEG2_ROTATE_DEG       150.0f
+#define SEG2_ROTATE_DEG       90.0f
 #define SEG2_LEFT_MOTOR_DIR   'f'       // 'f' = forward, 'b' = backward
 #define SEG2_RIGHT_MOTOR_DIR  'b'
 
 // Segment 3: Geradeaus fahren
-#define SEG3_FORWARD_MM       250.0f
+#define SEG3_FORWARD_MM       310.0f
 
 // Segment 4: Zweite Rotation
-#define SEG4_ROTATE_DEG       45.0f
-#define SEG4_LEFT_MOTOR_DIR   'b'
-#define SEG4_RIGHT_MOTOR_DIR  'f'
+#define SEG4_ROTATE_DEG       115.0f
+#define SEG4_LEFT_MOTOR_DIR   'f'
+#define SEG4_RIGHT_MOTOR_DIR  'b'
 
 // Segment 5: Geradeaus fahren
-#define SEG5_FORWARD_MM       200.0f - 78.0f	//- 80.0f
+#define SEG5_FORWARD_MM       425.0f - 65.0f	//- 80.0f
 
 #define REGULATION_INTERVAL 50u
-#define ENCODER_TICKS_PER_MM 0.20f
+#define ENCODER_TICKS_PER_MM 0.190f	//0.20f
 
 static YPARCOUR_TASK_STATE yparcour_task_state = YPARCOUR_INIT;
 static float base_speed = 0.0f;

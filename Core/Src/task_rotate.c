@@ -11,13 +11,13 @@
 
 #define REGULATION_INTERVAL 50u
 
-#define KP 0.00003f
+#define KP 0.000030f
 #define MIN_SPEED 32.0f
 #define MAX_SPEED 52.0f
-#define CORRECTION_KP 0.00005f
+#define CORRECTION_KP 0.000050f
 #define MAX_CORRECTION 12.0f
 
-#define ENCODER_TICKS_PER_DEG 0.13451375f	//0.1356975f	//0.138065f	//0.1428f	//0.13333f
+#define ENCODER_TICKS_PER_DEG 0.15381896410f	//0.14198673610f	//0.134513750f	//0.1356975f	//0.138065f	//0.1428f	//0.13333f
 
 static ROTATION_TASK_STATE rotation_task_state = ROTATION_INIT;
 static uint32_t last_regulation_time = 0u;

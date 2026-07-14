@@ -236,8 +236,8 @@ int main(void) {
 					current_robot_state = ROBOT_FOLLOW_LINE;
 				}
 				break;
-			}
-		}
+			} //	<-- switch case end klammer
+		}	//	<-- if case end klammer
 		taskLED();
 //		taskYParcour();
 //		taskLineFollower();

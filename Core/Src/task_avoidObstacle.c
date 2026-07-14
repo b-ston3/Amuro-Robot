@@ -24,7 +24,7 @@
 #define AVOID_ANGLE_2_DEG       45.0f
 
 // Schritt 4: Langes Stück am Hindernis vorbei
-#define AVOID_DRIVE_2_MM        110.0f	//105.0f
+#define AVOID_DRIVE_2_MM        125.0f	//105.0f
 
 // Schritt 5: Zweite Linksdrehung
 #define AVOID_ANGLE_3_DEG       67.5f
@@ -37,7 +37,7 @@
 #define AVOID_RETURN_MAX_DEG    120.0f  // Maximalwinkel als Fallback für die letzte Drehung
 
 // Hardware-Konstanten
-#define ENCODER_TICKS_PER_MM    0.20f
+#define ENCODER_TICKS_PER_MM    0.190f	//0.20f
 #define BLACK_THRESHOLD         3100
 
 static AVOID_OBSTACLE_STATE avoid_state = AVOID_INIT;

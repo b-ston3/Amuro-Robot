@@ -23,7 +23,7 @@ extern volatile uint32_t adc[6];
 
 // Regelungs-Parameter
 #define REGULATION_INTERVAL 20u     // in ms wie oft regeln
-#define KP 0.027f                   // Proportional-Verstärkung
+#define KP 0.0270f                   // Proportional-Verstärkung
 #define MAX_CORRECTION 30.0f
 
 #define RIGHT_SENSOR_OFFSET 100		//210     // Hardware-Unterschied der Sensoren
