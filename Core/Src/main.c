@@ -72,13 +72,14 @@ volatile uint8_t conversion_done_flag = 1;
 
 ROBOT_MAIN_STATE current_robot_state = ROBOT_DRIVE_YELLOW_PARCOUR;
 /*
- * Speicher	Channel	PIN		Sensor
- * adc[0]	IN5		PA0		lineSensor_middle
- * adc[1]	IN6		PA1		encoder_left
- * adc[2]	IN8		PA3		lineSensor_right
- * adc[3]	IN9		PA4		battery (voltage)
- * adc[4]	IN10 	PA5 	encoder_right
- * adc[5]	IN12	PA7		lineSensor_left
+ * Shared ADC DMA layout used by all behavior tasks.
+ * Index   Channel   Pin   Signal
+ * adc[0]  IN5       PA0   lineSensor_middle
+ * adc[1]  IN6       PA1   encoder_left
+ * adc[2]  IN8       PA3   lineSensor_right
+ * adc[3]  IN9       PA4   battery_voltage
+ * adc[4]  IN10      PA5   encoder_right
+ * adc[5]  IN12      PA7   lineSensor_left
  */
 /* USER CODE END PV */
 
@@ -135,11 +136,8 @@ int main(void) {
 	/* USER CODE BEGIN 2 */
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
-//	HAL_ADC_Start_DMA(&hadc1, buffer, 6);
 	taskLED_Init();
 	taskYParcour_Init(45.0f);
-	//taskLineFollower_Init(40.0f);
-//	taskDriveForward_Init(30.0f);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -149,23 +147,17 @@ int main(void) {
 			conversion_done_flag = 0;
 
 			HAL_ADC_Start_DMA(&hadc1, buffer, 6);
-			// Ausgabe der ADC -Werte hier
-			//adc[1]: encoder_left, adc[4]: encoder_right
+			// Keep encoder Schmitt trigger updates aligned to the ADC DMA cycle.
 			schmitt_trigger('l', adc[1]);
 			schmitt_trigger('r', adc[4]);
 
-//			uint8_t schmitt_l = schmitt_trigger('l', adc[1]);
-//			uint8_t schmitt_r = schmitt_trigger('r', adc[4]);
-//			ser_printf(
-//					"ADC-Werte: L=%lu, R=%lu; State (%u, %u); Flanken links: %lu, Rechts: %lu\n",
-//					adc[1], adc[4], schmitt_l, schmitt_r,
-//					get_l_enc_tickcounter(), get_r_enc_tickcounter());
-//			ser_printf("%lu, %lu\n", adc[1], adc[4]);
-			//adc[5]: lineSensor_left, adc[0]: lineSensor_middle, adc[2]: lineSensor_right
-//			ser_printf("%lu, %lu, %lu\n", adc[5], adc[0], adc[2]);
-
-//		}
-
+			/*
+			 * Main robot state machine:
+			 * YPARCOUR -> FOLLOW_LINE -> (SEARCH_LINE or AVOID_OBSTACLE)
+			 * SEARCH_LINE -> (FOLLOW_LINE or OVERCOME_GAP or AVOID_OBSTACLE)
+			 * OVERCOME_GAP -> FOLLOW_LINE
+			 * AVOID_OBSTACLE -> FOLLOW_LINE
+			 */
 			switch (current_robot_state) {
 			case ROBOT_DRIVE_YELLOW_PARCOUR:
 				taskYParcour();
@@ -188,9 +180,8 @@ int main(void) {
 					break;
 				}
 
-				// Transition: Wenn der Follower die Linie verliert
+				// If the line is lost, hand over to the recovery sweep task.
 				if (taskLineFollower_GetState() == LINE_LOST) {
-					// Wechsle in den Such-Modus und initialisiere ihn
 					taskSearchLine_Init(36.0f);
 					current_robot_state = ROBOT_SEARCH_LINE;
 				}
@@ -204,14 +195,14 @@ int main(void) {
 					current_robot_state = ROBOT_AVOID_OBSTACLE;
 					break;
 				}
-				// Transition 1: Linie erfolgreich wiedergefunden!
+
 				if (taskSearchLine_GetState() == SEARCH_SUCCESS) {
-					// Follower neu starten (damit er aus dem LINE_LOST State rauskommt)
+					// Reinitialize to leave LINE_LOST and resume closed-loop following.
 					taskLineFollower_Init(36.0f);
 					current_robot_state = ROBOT_FOLLOW_LINE;
 				}
-				// Transition 2: Suche erfolglos, es muss eine Lücke sein!
 				else if (taskSearchLine_GetState() == SEARCH_FAILED_GAP) {
+					// Search sweep found no line: switch to gap traversal behavior.
 					taskSearchLine_Init(36.0f);
 					taskOvercomeGap_Init(36.0f);
 					current_robot_state = ROBOT_OVERCOME_GAP;
@@ -221,7 +212,6 @@ int main(void) {
 			case ROBOT_OVERCOME_GAP:
 				taskOvercomeGap();
 
-				// Transition: Lücke überwunden, Linie ist wieder da!
 				if (taskOvercomeGap_GetState() == GAP_SUCCESS) {
 					taskOvercomeGap_Init(36.0f);
 					taskLineFollower_Init(36.0f);
@@ -236,18 +226,12 @@ int main(void) {
 					current_robot_state = ROBOT_FOLLOW_LINE;
 				}
 				break;
-			} //	<-- switch case end klammer
-		}	//	<-- if case end klammer
+			}
+		}
 		taskLED();
-//		taskYParcour();
-//		taskLineFollower();
-//		taskDriveForward();
-//		motorControl('r', 'f', 15.0f);
-//		motorControl('l', 'f', 15.0f);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-		//}
 		/* USER CODE END 3 */
 	}
 }
@@ -312,6 +296,7 @@ void SystemClock_Config(void) {
 
 /* USER CODE BEGIN 4 */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc1) {
+	// Publish one coherent ADC sample set, then unblock the next control cycle.
 	for (int i = 0; i < 6; i++) {
 		adc[i] = buffer[i];
 	}

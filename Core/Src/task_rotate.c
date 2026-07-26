@@ -17,7 +17,7 @@
 #define CORRECTION_KP 0.000050f
 #define MAX_CORRECTION 12.0f
 
-#define ENCODER_TICKS_PER_DEG 0.15381896410f	//0.14198673610f	//0.134513750f	//0.1356975f	//0.138065f	//0.1428f	//0.13333f
+#define ENCODER_TICKS_PER_DEG 0.15381896410f
 
 static ROTATION_TASK_STATE rotation_task_state = ROTATION_INIT;
 static uint32_t last_regulation_time = 0u;
@@ -54,7 +54,7 @@ void taskRotate(void) {
 
 	switch (rotation_task_state) {
 	case ROTATION_INIT:
-		//reset both encoder tick counter
+		// Reset both encoder tick counters.
 		reset_l_enc_tickcounter();
 		reset_r_enc_tickcounter();
 

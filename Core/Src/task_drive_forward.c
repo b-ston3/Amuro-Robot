@@ -15,12 +15,12 @@ static uint32_t last_regulation_time = 0;
 static float left_speed = 0.0f;
 static float right_speed = 0.0f;
 
-//Regelungs-Parameter
-#define REGULATION_INTERVAL 50u	// in ms wie oft regeln
-#define KP 0.000050f					// Proportional-Verstärkung
-#define MAX_CORRECTION 20.0f	// [%]  Max. Korrektur pro Seite
+// Control-loop parameters.
+#define REGULATION_INTERVAL 50u      // Regulation interval in milliseconds.
+#define KP 0.000050f                 // Proportional gain.
+#define MAX_CORRECTION 20.0f         // Maximum per-side correction in percent.
 
-// Motor-Kompensation (Hardware-Unterschiede ausgleichen)
+// Optional per-motor feed-forward offsets for hardware balancing.
 #define LEFT_MOTOR_OFFSET 0.0f
 #define RIGHT_MOTOR_OFFSET 0.0f
 
@@ -52,7 +52,7 @@ void taskDriveForward(void) {
 		motorControl('l', 'f', base_speed);
 		motorControl('r', 'f', base_speed);
 
-		//reset both encoder tick counter
+		// Reset both encoder tick counters.
 		reset_l_enc_tickcounter();
 		reset_r_enc_tickcounter();
 

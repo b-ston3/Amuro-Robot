@@ -1,5 +1,5 @@
 /*
- * uart_debug.c
+ * uart_debug.h
  *
  *  Created on: Jun 3, 2026
  *      Author: ben
@@ -16,13 +16,13 @@
 #define UART_DEBUG_BUFFER_SIZE 256
 
 /**
- * Debug Print Funktion (variadisch - wie printf)
+ * UART debug print helper (variadic, printf-style).
  *
- * Beispiele:
- *   uart_printf("Hallo %s\n", "Welt");
- *   uart_printf("ADC Werte: L=%lu, R=%lu\n", adc[1], adc[4]);
- *   uart_printf("Calib: L=%u, R=%u (Samples: %u)\n", adc[1], adc[4], samples);
+ * Examples:
+ *   ser_printf("Hello %s\n", "world");
+ *   ser_printf("ADC values: L=%lu, R=%lu\n", adc[1], adc[4]);
+ *   ser_printf("Calib: L=%u, R=%u (samples: %u)\n", adc[1], adc[4], samples);
  */
 void ser_printf(const char *format, ...);
 
-#endif /* INC_UART_DEBUG_C_ */
+#endif /* UART_DEBUG_H */
