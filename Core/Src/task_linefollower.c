@@ -17,18 +17,18 @@ static float right_speed = 0.0f;
 
 static LINE_LAST_SEEN line_last_seen = LINE_MIDDLE;
 
-// Zugriff auf das globale ADC-Array aus der main.c
-// adc[5]: lineSensor_left, adc[0]: lineSensor_middle, adc[2]: lineSensor_right
+// Shared ADC buffer produced by main.c DMA callback.
+// adc[5]: left, adc[0]: middle, adc[2]: right line sensor.
 extern volatile uint32_t adc[6];
 
-// Regelungs-Parameter
-#define REGULATION_INTERVAL 20u     // in ms wie oft regeln
-#define KP 0.0270f                   // Proportional-Verstärkung
+// Control-loop parameters.
+#define REGULATION_INTERVAL 20u      // Regulation interval in milliseconds.
+#define KP 0.0270f                   // Proportional gain.
 #define MAX_CORRECTION 30.0f
 
-#define RIGHT_SENSOR_OFFSET 100		//210     // Hardware-Unterschied der Sensoren
+#define RIGHT_SENSOR_OFFSET 100      // Compensates fixed left/right sensor mismatch.
 
-#define BLACK_THRESHOLD 3100        // ADC-Werte unter diesem Wert gelten als "Weiß"
+#define BLACK_THRESHOLD 3100         // Values at or above threshold are treated as black.
 
 static float clampf(float val, float lo, float hi) {
 	if (val < lo)
@@ -71,6 +71,7 @@ void taskLineFollower(void) {
 
 			if (raw_left < BLACK_THRESHOLD && raw_middle < BLACK_THRESHOLD
 					&& raw_right < BLACK_THRESHOLD) {
+				// main.c switches from ROBOT_FOLLOW_LINE to ROBOT_SEARCH_LINE on LINE_LOST.
 				linefollower_task_state = LINE_LOST;
 				break;
 			}
@@ -145,5 +146,6 @@ float taskLineFollower_getRightSpeed(void) {
 }
 
 LINE_LAST_SEEN taskLineFollower_GetLastSeen(void) {
+	// taskSearchLine uses this to choose its primary sweep direction.
 	return line_last_seen;
 }

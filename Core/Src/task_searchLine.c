@@ -12,7 +12,7 @@
 #include "uart_debug.h"
 
 #define SWEEP_100_DEG_TICKS 31
-#define BLACK_THRESHOLD 3100	//2800
+#define BLACK_THRESHOLD 3100
 #define REGULATION_INTERVAL 20u
 
 static uint32_t last_regulation_time = 0;
@@ -20,9 +20,10 @@ static SEARCH_LINE_STATE search_state = SEARCH_INIT;
 static float base_speed = 0.0f;
 static LINE_LAST_SEEN primary_direction;
 
+// Shared ADC buffer produced by main.c DMA callback.
 extern volatile uint32_t adc[6];
 
-// Hilfsfunktion zur Linienerkennung
+// True when any line sensor sees black.
 static uint8_t is_line_found(void) {
 	if (adc[5] > BLACK_THRESHOLD || adc[0] > BLACK_THRESHOLD
 			|| adc[2] > BLACK_THRESHOLD) {
@@ -43,6 +44,7 @@ void taskSearchLine(void) {
 
 	switch (search_state) {
 	case SEARCH_INIT:
+		// Main enters SEARCH_LINE from LINE_LOST; reuse the last known side as first sweep direction.
 		primary_direction = taskLineFollower_GetLastSeen();
 		reset_l_enc_tickcounter();
 		reset_r_enc_tickcounter();
@@ -52,7 +54,7 @@ void taskSearchLine(void) {
 
 	case SEARCH_SWEEP_PRIMARY_OUT:
 		if (time_since_regulation >= REGULATION_INTERVAL) {
-			// Abbruchbedingung: Linie gefunden!
+			// Stop sweep immediately once the line is detected.
 			if (is_line_found()) {
 				motorControl('l', 'f', 0);
 				motorControl('r', 'f', 0);
@@ -69,7 +71,7 @@ void taskSearchLine(void) {
 					reset_r_enc_tickcounter();
 					search_state = SEARCH_SWEEP_PRIMARY_IN;
 				}
-			} else { // RIGHT oder MIDDLE als Default nach rechts
+			} else { // RIGHT or MIDDLE default to the right sweep.
 				motorControl('l', 'f', base_speed);
 				motorControl('r', 'f', 0);
 				if (get_l_enc_tickcounter() > SWEEP_100_DEG_TICKS) {
@@ -92,7 +94,7 @@ void taskSearchLine(void) {
 				break;
 			}
 
-			// Drehe zurück in die Ausgangsposition
+			// Rotate back toward the start heading.
 			if (primary_direction == LINE_LEFT) {
 				motorControl('l', 'f', 0);
 				motorControl('r', 'b', base_speed);
@@ -123,7 +125,7 @@ void taskSearchLine(void) {
 				last_regulation_time = current_time;
 				break;
 			}
-			// In die andere Richtung absuchen
+			// Sweep the opposite side before giving up.
 			if (primary_direction == LINE_LEFT) {
 				motorControl('l', 'f', base_speed);
 				motorControl('r', 'f', 0);
@@ -155,7 +157,7 @@ void taskSearchLine(void) {
 				break;
 			}
 
-			// Zurück zur Mitte
+			// Return to center; if still no line, main should treat this as a gap.
 			if (primary_direction == LINE_LEFT) {
 				motorControl('l', 'b', base_speed);
 				motorControl('r', 'f', 0);

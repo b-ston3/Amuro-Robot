@@ -11,35 +11,36 @@
 #include "motor-control.h"
 #include "encoder.h"
 
-#define AVOID_SPEED             35.0f   // Basis-Geschwindigkeit
+#define AVOID_SPEED             35.0f   // Base speed for the maneuver sequence.
 #define AVOID_BACKUP_MM         40.0f
 
-// Schritt 1: Rechtsdrehung
+// Step 1: initial right turn.
 #define AVOID_ANGLE_1_DEG       45.0f
 
-// Schritt 2: Erstes Stück geradeaus
+// Step 2: first forward segment.
 #define AVOID_DRIVE_1_MM        105.0f
 
-// Schritt 3: Erste Linksdrehung
+// Step 3: first left turn.
 #define AVOID_ANGLE_2_DEG       45.0f
 
-// Schritt 4: Langes Stück am Hindernis vorbei
-#define AVOID_DRIVE_2_MM        125.0f	//105.0f
+// Step 4: longer forward segment past the obstacle.
+#define AVOID_DRIVE_2_MM        125.0f
 
-// Schritt 5: Zweite Linksdrehung
+// Step 5: second left turn.
 #define AVOID_ANGLE_3_DEG       67.5f
 
-// Schritt 6: Zurück in Richtung Linie
+// Step 6: drive toward the expected line position.
 #define AVOID_DRIVE_3_MM        100.0f
 #define AVOID_DRIVE_3_SEARCH_IN_MM 80.0f
 
-// Schritt 7: Finale Rechtsdrehung zur Linie
-#define AVOID_RETURN_MAX_DEG    120.0f  // Maximalwinkel als Fallback für die letzte Drehung
+// Step 7: final right turn to reacquire the line.
+#define AVOID_RETURN_MAX_DEG    120.0f  // Max fallback angle for the final turn.
 
-// Hardware-Konstanten
-#define ENCODER_TICKS_PER_MM    0.190f	//0.20f
+// Hardware conversion constants.
+#define ENCODER_TICKS_PER_MM    0.190f
 #define BLACK_THRESHOLD         3100
 
+// Shared ADC buffer produced by main.c DMA callback.
 static AVOID_OBSTACLE_STATE avoid_state = AVOID_INIT;
 extern volatile uint32_t adc[6];
 
@@ -48,6 +49,10 @@ void taskAvoidObstacle_Init(void) {
 }
 
 void taskAvoidObstacle(void) {
+	/*
+	 * Local obstacle-avoidance sequence.
+	 * main.c enters this task after bumper detection and exits on AVOID_SUCCESS.
+	 */
 	switch (avoid_state) {
 	case AVOID_INIT:
 		reset_l_enc_tickcounter();
@@ -64,7 +69,7 @@ void taskAvoidObstacle(void) {
 			motorControl('r', 'f', 0);
 			reset_l_enc_tickcounter();
 			reset_r_enc_tickcounter();
-			// Drehung nach rechts
+			// Turn right.
 			taskRotate_Init(AVOID_ANGLE_1_DEG, 'f', 'b');
 			avoid_state = AVOID_TURN_RIGHT_1;
 		}
@@ -87,7 +92,7 @@ void taskAvoidObstacle(void) {
 			taskDriveForward_Stop();
 			reset_l_enc_tickcounter();
 			reset_r_enc_tickcounter();
-			// Drehung nach links
+			// Turn left.
 			taskRotate_Init(AVOID_ANGLE_2_DEG, 'b', 'f');
 			avoid_state = AVOID_TURN_LEFT_1;
 		}
@@ -110,7 +115,7 @@ void taskAvoidObstacle(void) {
 			taskDriveForward_Stop();
 			reset_l_enc_tickcounter();
 			reset_r_enc_tickcounter();
-			// Drehung nach links
+			// Turn left.
 			taskRotate_Init(AVOID_ANGLE_3_DEG, 'b', 'f');
 			avoid_state = AVOID_TURN_LEFT_2;
 		}
@@ -143,14 +148,14 @@ void taskAvoidObstacle(void) {
 			taskDriveForward_Stop();
 			reset_l_enc_tickcounter();
 			reset_r_enc_tickcounter();
-			// Finale Drehung nach rechts
+			// Final right turn to search for the line.
 			taskRotate_Init(AVOID_RETURN_MAX_DEG, 'f', 'b');
 			avoid_state = AVOID_TURN_RIGHT_TO_LINE;
 		}
 		break;
 
 	case AVOID_TURN_RIGHT_TO_LINE:
-		// Sensor erkennt Linie --> Drehung abbrechen
+		// Stop rotating immediately when any line sensor detects black.
 		if (adc[5] > BLACK_THRESHOLD || adc[0] > BLACK_THRESHOLD
 				|| adc[2] > BLACK_THRESHOLD) {
 			taskRotate_Stop();
@@ -162,14 +167,14 @@ void taskAvoidObstacle(void) {
 
 		taskRotate();
 
-		// Fallback: Falls Roboter sich komplett gedreht hat und keine Linie gefunden hat
+		// Fallback: stop searching after the bounded turn completes.
 		if (taskRotate_GetState() == ROTATION_STOP) {
 			avoid_state = AVOID_SUCCESS;
 		}
 		break;
 
 	case AVOID_SUCCESS:
-		// Wartet darauf, von der Super-State-Machine in der main.c umgeschaltet zu werden
+		// main.c consumes AVOID_SUCCESS and switches back to ROBOT_FOLLOW_LINE.
 		break;
 	}
 }

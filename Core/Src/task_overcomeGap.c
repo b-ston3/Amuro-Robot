@@ -11,12 +11,12 @@
 #include "motor-control.h"
 #include "encoder.h"
 
-#define GAP_STEP_MM             50.0f   // Abstand zwischen den Drehetappen
-#define GAP_SWEEP_DEG           17.0f   // Drehwinkel in Drehetappe
-#define MAX_GAP_MM              300.0f  // Sicherheitsabschaltung
+#define GAP_STEP_MM             50.0f   // Forward step between scan sweeps.
+#define GAP_SWEEP_DEG           17.0f   // Rotation angle per scan sweep.
+#define MAX_GAP_MM              300.0f  // Safety stop if no line is found.
 
-#define ENCODER_TICKS_PER_MM    0.190f	//0.20f
-#define BLACK_THRESHOLD         3100    // Schwellenwert für die Linienerkennung
+#define ENCODER_TICKS_PER_MM    0.190f
+#define BLACK_THRESHOLD         3100    // Line-detection threshold from ADC sensors.
 
 #define REGULATION_INTERVAL     20u
 
@@ -26,6 +26,7 @@ static float total_distance_driven = 0.0f;
 
 static uint32_t last_regulation_time = 0;
 
+// Shared ADC buffer produced by main.c DMA callback.
 extern volatile uint32_t adc[6];
 
 static uint8_t is_line_found(void) {
@@ -53,11 +54,11 @@ void taskOvercomeGap(void) {
 		if (gap_state >= GAP_DRIVE_STEP_INIT
 				&& gap_state <= GAP_RETURN_CENTER) {
 			if (is_line_found()) {
-				// Sub-Tasks sicher beenden
+				// Stop active sub-tasks before returning control.
 				taskDriveForward_Stop();
 				taskRotate_Stop();
 
-				// Anhalten
+				// Stop both motors and report success to main state machine.
 				motorControl('l', 'f', 0);
 				motorControl('r', 'f', 0);
 				gap_state = GAP_SUCCESS;
@@ -71,7 +72,7 @@ void taskOvercomeGap(void) {
 			gap_state = GAP_DRIVE_STEP_INIT;
 			break;
 
-			// 1.: Ein Stück geradeaus fahren
+			// 1) Drive one forward step.
 		case GAP_DRIVE_STEP_INIT:
 			reset_l_enc_tickcounter();
 			reset_r_enc_tickcounter();
@@ -97,11 +98,11 @@ void taskOvercomeGap(void) {
 			}
 			break;
 
-			// 2.: Kurz nach links "schauen"
+			// 2) Sweep left briefly.
 		case GAP_CHECK_LEFT_INIT:
 			reset_l_enc_tickcounter();
 			reset_r_enc_tickcounter();
-			taskRotate_Init(GAP_SWEEP_DEG, 'b', 'f'); // Auf der Stelle nach links
+			taskRotate_Init(GAP_SWEEP_DEG, 'b', 'f'); // Rotate in place to the left.
 			taskRotate();
 			gap_state = GAP_CHECK_LEFT;
 			break;
@@ -113,11 +114,11 @@ void taskOvercomeGap(void) {
 			}
 			break;
 
-			// 3.: Nach rechts "schauen" (Doppelter Winkel, da wir aktuell links stehen)
+			// 3) Sweep right across center to the opposite side.
 		case GAP_CHECK_RIGHT_INIT:
 			reset_l_enc_tickcounter();
 			reset_r_enc_tickcounter();
-			taskRotate_Init(GAP_SWEEP_DEG * 2.0f, 'f', 'b'); // Auf der Stelle nach rechts
+			taskRotate_Init(GAP_SWEEP_DEG * 2.0f, 'f', 'b'); // Rotate in place to the right.
 			taskRotate();
 			gap_state = GAP_CHECK_RIGHT;
 			break;
@@ -129,11 +130,11 @@ void taskOvercomeGap(void) {
 			}
 			break;
 
-			// 4.: Wieder mittig ausrichten
+			// 4) Return to center heading.
 		case GAP_RETURN_CENTER_INIT:
 			reset_l_enc_tickcounter();
 			reset_r_enc_tickcounter();
-			taskRotate_Init(GAP_SWEEP_DEG, 'b', 'f'); // Zurück zur Mitte
+			taskRotate_Init(GAP_SWEEP_DEG, 'b', 'f'); // Rotate back to center.
 			taskRotate();
 			gap_state = GAP_RETURN_CENTER;
 			break;
@@ -141,17 +142,17 @@ void taskOvercomeGap(void) {
 		case GAP_RETURN_CENTER:
 			taskRotate();
 			if (taskRotate_GetState() == ROTATION_STOP) {
-				// Scan abgeschlossen, nichts gefunden -> Nächstes Stück geradeaus
+				// Completed one scan cycle without line detection; advance to next step.
 				gap_state = GAP_DRIVE_STEP_INIT;
 			}
 			break;
 
 		case GAP_SUCCESS:
-			// Die Super-State-Machine wechselt jetzt wieder in den Linefollower
+			// main.c consumes GAP_SUCCESS and switches back to ROBOT_FOLLOW_LINE.
 			break;
 
 		case GAP_FAILED:
-			// Lücke war zu groß -> Roboter stoppen
+			// Gap scan exceeded allowed distance; keep robot stopped.
 			motorControl('l', 'f', 0);
 			motorControl('r', 'f', 0);
 			break;

@@ -12,10 +12,10 @@
 
 typedef enum {
 	SEARCH_INIT,
-	SEARCH_SWEEP_PRIMARY_OUT, // Dreht in vermutete Richtung
-	SEARCH_SWEEP_PRIMARY_IN,  // Dreht zurück zur Mitte
-	SEARCH_SWEEP_SECONDARY_OUT, // Dreht in andere Richtung
-	SEARCH_SWEEP_SECONDARY_IN,  // Dreht zurück zur Mitte
+	SEARCH_SWEEP_PRIMARY_OUT,   // Sweep first toward the side where the line was last seen.
+	SEARCH_SWEEP_PRIMARY_IN,    // Return from the primary sweep to center.
+	SEARCH_SWEEP_SECONDARY_OUT, // Sweep to the opposite side.
+	SEARCH_SWEEP_SECONDARY_IN,  // Return from the secondary sweep to center.
 	SEARCH_SUCCESS,
 	SEARCH_FAILED_GAP
 } SEARCH_LINE_STATE;

@@ -12,27 +12,27 @@
 #include "task_drive_forward.h"
 #include "task_rotate.h"
 
-// Segment 1: Geradeaus fahren
+// Segment 1: drive forward.
 #define SEG1_FORWARD_MM       590.0f
 
-// Segment 2: Erste Rotation
+// Segment 2: first rotation.
 #define SEG2_ROTATE_DEG       90.0f
 #define SEG2_LEFT_MOTOR_DIR   'f'       // 'f' = forward, 'b' = backward
 #define SEG2_RIGHT_MOTOR_DIR  'b'
 
-// Segment 3: Geradeaus fahren
+// Segment 3: drive forward.
 #define SEG3_FORWARD_MM       310.0f
 
-// Segment 4: Zweite Rotation
+// Segment 4: second rotation.
 #define SEG4_ROTATE_DEG       115.0f
 #define SEG4_LEFT_MOTOR_DIR   'f'
 #define SEG4_RIGHT_MOTOR_DIR  'b'
 
-// Segment 5: Geradeaus fahren
-#define SEG5_FORWARD_MM       425.0f - 65.0f	//- 80.0f
+// Segment 5: final forward approach before line-follow mode starts.
+#define SEG5_FORWARD_MM       425.0f - 65.0f
 
 #define REGULATION_INTERVAL 50u
-#define ENCODER_TICKS_PER_MM 0.190f	//0.20f
+#define ENCODER_TICKS_PER_MM 0.190f
 
 static YPARCOUR_TASK_STATE yparcour_task_state = YPARCOUR_INIT;
 static float base_speed = 0.0f;
@@ -59,7 +59,7 @@ static void run_forward_segment(float distance_mm,
 		YPARCOUR_TASK_STATE next_state) {
 	switch (taskDriveForward_GetState()) {
 	case DRIVE_INIT:
-		//reset both encoder tick counter
+		// Reset both encoder tick counters.
 		reset_l_enc_tickcounter();
 		reset_r_enc_tickcounter();
 
@@ -77,19 +77,10 @@ static void run_forward_segment(float distance_mm,
 
 		if (progress_ticks >= target_ticks) {
 			taskDriveForward_Stop();
-//			ser_printf(
-//					"PARCOURS: state=%d done (forward %.0fmm), ticks L=%ld R=%ld target=%ld\n",
-//					yparcour_task_state, distance_mm, left_ticks, right_ticks,
-//					target_ticks);
 			break;
 		}
 
 		taskDriveForward();
-//		ser_printf(
-//				"PARCOURS: state=%d fwd=%.0fmm progress=%ld/%ld ticks L=%ld R=%ld vL=%.1f vR=%.1f\n",
-//				yparcour_task_state, distance_mm, progress_ticks, target_ticks,
-//				left_ticks, right_ticks, taskDriveForward_getLeftSpeed(),
-//				taskDriveForward_getRightSpeed());
 		break;
 
 	case DRIVE_STOP:
@@ -143,6 +134,7 @@ void taskYParcour_Init(float speed) {
 }
 
 void taskYParcour(void) {
+	// main.c starts this task first and switches to ROBOT_FOLLOW_LINE on YPARCOUR_FINISHED.
 	switch (yparcour_task_state) {
 	case YPARCOUR_INIT:
 		reset_l_enc_tickcounter();
