@@ -18,7 +18,7 @@ static float right_speed = 0.0f;
 static LINE_LAST_SEEN line_last_seen = LINE_MIDDLE;
 
 // Shared ADC buffer produced by main.c DMA callback.
-// adc[5]: left, adc[0]: middle, adc[2]: right line sensor.
+// adc[5]: lineSensor_left, adc[0]: lineSensor_middle, adc[2]: lineSensor_right
 extern volatile uint32_t adc[6];
 
 // Control-loop parameters.

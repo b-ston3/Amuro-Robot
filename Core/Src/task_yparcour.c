@@ -29,6 +29,7 @@
 #define SEG4_RIGHT_MOTOR_DIR  'b'
 
 // Segment 5: final forward approach before line-follow mode starts.
+// Minus offset so yellow parcour is finished with lineSensor on line
 #define SEG5_FORWARD_MM       425.0f - 65.0f
 
 #define REGULATION_INTERVAL 50u

@@ -29,7 +29,7 @@
 // Step 5: second left turn.
 #define AVOID_ANGLE_3_DEG       67.5f
 
-// Step 6: drive toward the expected line position.
+// Step 6: drive toward the expected line position and search line in the last mm
 #define AVOID_DRIVE_3_MM        100.0f
 #define AVOID_DRIVE_3_SEARCH_IN_MM 80.0f
 
@@ -40,8 +40,9 @@
 #define ENCODER_TICKS_PER_MM    0.190f
 #define BLACK_THRESHOLD         3100
 
-// Shared ADC buffer produced by main.c DMA callback.
 static AVOID_OBSTACLE_STATE avoid_state = AVOID_INIT;
+
+// Shared ADC buffer produced by main.c DMA callback.
 extern volatile uint32_t adc[6];
 
 void taskAvoidObstacle_Init(void) {

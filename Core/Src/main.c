@@ -73,11 +73,11 @@ volatile uint8_t conversion_done_flag = 1;
 ROBOT_MAIN_STATE current_robot_state = ROBOT_DRIVE_YELLOW_PARCOUR;
 /*
  * Shared ADC DMA layout used by all behavior tasks.
- * Index   Channel   Pin   Signal
+ * Index   Channel   Pin   Sensor
  * adc[0]  IN5       PA0   lineSensor_middle
  * adc[1]  IN6       PA1   encoder_left
  * adc[2]  IN8       PA3   lineSensor_right
- * adc[3]  IN9       PA4   battery_voltage
+ * adc[3]  IN9       PA4   battery (voltage)
  * adc[4]  IN10      PA5   encoder_right
  * adc[5]  IN12      PA7   lineSensor_left
  */
@@ -153,7 +153,8 @@ int main(void) {
 
 			/*
 			 * Main robot state machine:
-			 * YPARCOUR -> FOLLOW_LINE -> (SEARCH_LINE or AVOID_OBSTACLE)
+			 * YPARCOUR -> FOLLOW_LINE
+			 * FOLLOW_LINE -> (SEARCH_LINE or AVOID_OBSTACLE)
 			 * SEARCH_LINE -> (FOLLOW_LINE or OVERCOME_GAP or AVOID_OBSTACLE)
 			 * OVERCOME_GAP -> FOLLOW_LINE
 			 * AVOID_OBSTACLE -> FOLLOW_LINE
